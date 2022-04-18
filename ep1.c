@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <conio.h>
 #define true 1
 #define false 0
 typedef int bool;
@@ -145,129 +146,49 @@ int *dijkstra(GRAFO *grafo, int origem) {
     return(custos);
 }
 
-int **alocaMatriz(int linhas, int colunas) {
-    int i, j;
-    int **m;
-    m = (int **)calloc(linhas, sizeof(int*));
-    if (m == NULL) {
-        return NULL;
-    }
-
-    for (i = 0; i < linhas; i++) {
-        m[i] = (int *)calloc(colunas, sizeof(int*));
-        if (m[i] == NULL) {
-            for (j = 0; j < i; j++) {
-                free(m[j]);
-            }
-            free(m);
-            return NULL;
-        }
-    }
-    return m;
-}
-
-int *alocaVetor(int qntdPosicoes) {
-    int *vetorDinamico;
-    vetorDinamico = (int *)calloc(qntdPosicoes, sizeof(int*));
-    if(vetorDinamico == NULL){
-        return NULL; // Memória Insuficiente
-    }
-    return vetorDinamico;
-}
-
-void imprimeMatriz(int **m, int linhas, int colunas) {
-    int i, j;
-    for (i = 0 ; i < linhas; i++) {
-        for (j = 0 ; j < colunas; j++) {
-            printf(" %d ", m[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-
-int iniciaPrograma() {
+GRAFO *iniciaPrograma(char* nomeArquivo) {
 
     int quantVertices = 0, quantArestas = 0, verticeInicial = 0, verticeDestino = 0;
     int u,v,custo_aresta;
     int *custo, **arestas;
-    char nomeArquivo[400];
-
+    /*
     printf("Digite o nome do arquivo de texto:\n");
     scanf(" %s", nomeArquivo);
     printf("\n");
-
+*/
     // abre arquivo
 
     FILE *arquivo = fopen(nomeArquivo, "r");
 
-    if (arquivo == NULL) {
-        perror("Error");
-        printf("problema ao abrir o arquivo. Verifique se o arquivo de texto se encontra no mesmo diretório do programa ou se está vazio.");
-        return 1;
-    }
-
     // guarda as informacoes adquiridas pelo arquivo
     fscanf (arquivo, " %d %d %d %d", &quantVertices, &quantArestas, &verticeInicial, &verticeDestino);
-    printf("%d %d %d %d", quantVertices, quantArestas, verticeInicial, verticeDestino);
-    printf("\n");
     
-    GRAFO *gr = criaGrafo(quantVertices);
-    arestas = alocaMatriz(quantArestas, 2);
-    custo = alocaVetor(quantArestas);
+    // cria o grafo com a quantide de vértices
+    GRAFO *grafo = criaGrafo(quantVertices);
+
 
     // guarda arestas em forma de matriz, e custo em um vetor
     for (int i = 0; i < quantArestas; i++) {
         for (int j = 0; j < 1; j++) {
             fscanf(arquivo, "%d %d %d", &u, &v, &custo_aresta);            
-            criaAresta(gr, u-1, v-1, custo_aresta);
-            printf("u= %d e v= %d", u, v);
-            arestas[i][j] = u;
-            arestas[i][j+1] = v;
-            custo[i] = custo_aresta;
+            criaAresta(grafo, u-1, v-1, custo_aresta);
         }
     }
-
     fclose(arquivo);
-    imprimeMatriz(arestas, quantArestas, 2);
-    //imprimeVetor(custo, quantArestas);
-
+    
+    
     int *r;
     int vertice = 0;
     int i;
-    for(vertice=0;vertice<gr->vertices; vertice++){
-      r = dijkstra(gr, vertice);
-      for (i=0; i<gr->vertices; i++)
-        printf("D(v%d -> v%d) = %d\n", vertice+1, i+1, r[i]);
-    }
 
+    r = dijkstra(grafo, verticeInicial-1);
+    printf("Custo: D(v%d -> v%d) = %d\n", vertice+1, verticeDestino, r[verticeDestino-1]);
+    return(grafo);
 }
 
-
-int main(void) {
-    iniciaPrograma();
-    /*
-    GRAFO *gr = criaGrafo(5);
-    criaAresta(gr,0, 1, 23 );
-    criaAresta(gr,0, 2, 20 );
-    criaAresta(gr,0, 3, 18 );
-    criaAresta(gr,2, 3, 12 );
-    criaAresta(gr,3, 4, 10 );
-    criaAresta(gr,1, 4, 14 );
-    criaAresta(gr,4, 0, 40 );
-    */
-    //imprimeGrafo(gr);
-    printf("\nFim do grafo\n");
-    int *r;
-    int vertice = 0;
-    int i;
-    /*
-    for(vertice=0;vertice<gr->vertices; vertice++){
-      r = dijkstra(gr, vertice);
-      for (i=0; i<gr->vertices; i++)
-        printf("D(v%d -> v%d) = %d\n", vertice, i, r[i]);
-    }
-    */
-        
-    return(0);
+int main( int argc, char *argv[ ] )
+{
+    GRAFO *grafo = iniciaPrograma(argv[1]);
+    getch();
+    return 0;
 }

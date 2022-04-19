@@ -1,4 +1,4 @@
-/* ep1.c 2022.1 - Grafos - Progessor Glauber Cintra
+/* ep1.c 2022.1 - Grafos - Professor Glauber Cintra
 Integrantes:
     Marcus Vinícius Alves Vieira
     Jhennyfer Rodrigues de Oliveira 

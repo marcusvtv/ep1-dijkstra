@@ -183,7 +183,7 @@ void imprimeGrafo(GRAFO *grafo)
     }
 }
 
-// retorna um vetor com as custos do vertice de origem para os outros vértices
+// retorna um vetor com o menor caminho entre dois vertices
 int *dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas, int *custo)
 {
     int *custos = (int *)malloc(grafo->vertices * sizeof(int));

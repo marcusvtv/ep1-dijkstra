@@ -147,6 +147,7 @@ void imprimeCaminhoMinimo(int origem, int destino, int *caminho, int quantAresta
     printf("\n");
 }
 
+// retorna um vetor com o caminho minimo
 int *encontraCaminhoMinimo(int origem, int destino, int *predecessores, int quantArestas)
 {
     int aux;
@@ -161,7 +162,7 @@ int *encontraCaminhoMinimo(int origem, int destino, int *predecessores, int quan
         caminho[quantArestas - i - 1] = aux;
         i++;
     }
-    // imprimeCaminhoMinimo(origem, destino, caminho, quantArestas);
+    
     return (caminho);
 }
 
@@ -201,6 +202,7 @@ void dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas)
         printf("Não existe caminho entre os vertices  %d e %d.\n", origem, destino);
 }
 
+// abre o arquivo, cria o grafo correspondente e chama dijkstra
 void iniciaPrograma(char *nomeArquivo)
 {
 
@@ -220,7 +222,7 @@ void iniciaPrograma(char *nomeArquivo)
     {
         printf("O vertice origem ou destino esta fora do grafo.");
     }
-    else //caso contrário, cria o grafo e prossegue
+    else // caso contrário, cria o grafo e prossegue
     {
 
         // cria o grafo com a quantide de vértices
@@ -236,13 +238,13 @@ void iniciaPrograma(char *nomeArquivo)
                 criaAresta(grafo, u - 1, v - 1, custo_aresta);
         }
 
-        //fecha o arquivo
+        // fecha o arquivo
         fclose(arquivo);
 
-        //testa se tem aresta de custo negativo
+        // testa se tem aresta de custo negativo
         if (!arestaNegativa)
         {
-            //testa se o vertice inicial é diferente do vertice destino. Se forem diferentes, executa dijkstra, do contrário imprime custo zero.
+            // testa se o vertice inicial é diferente do vertice destino. Se forem diferentes, executa dijkstra, do contrário imprime custo zero.
             if (verticeInicial != verticeDestino)
             {
                 dijkstra(grafo, verticeInicial - 1, verticeDestino, quantArestas);

@@ -1,3 +1,11 @@
+/* ep1.c 2022.1 - Grafos - Progessor Glauber Cintra
+Integrantes:
+    Marcus Vinícius Alves Vieira
+    Jhennyfer Rodrigues de Oliveira 
+    Bruno Wilson Moura do Nascimento
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -220,7 +228,7 @@ int *dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas, int *cust
     return (caminho);
 }
 
-// abre o arquivo, cria o grafo correspondente e chama dijkstra
+// abre o arquivo, e retorna o grafo correspondente, preenchendo variaveis de controle passada por referencia
 GRAFO *montaGrafoDeArquivo(char *nomeArquivo, int *origem, int *destino, bool *arcoNegativo, bool *foraEscopo)
 {
 
@@ -264,6 +272,13 @@ GRAFO *montaGrafoDeArquivo(char *nomeArquivo, int *origem, int *destino, bool *a
 
 int main(int argc, char *argv[])
 {
+    if (argc < 2)
+    {
+     // Erro, falta de argumentos
+     printf("Argumentos insuficientes. Digite o nome do arquivo como argumento na linha de comando");
+     return (0);
+    }
+
     //variaveis de controle
     int verticeInicial = 0, verticeDestino = 0, custo = -1;
     bool arestaNegativa = false, verticeForaEscopo = false;

@@ -92,7 +92,6 @@ void inicializaDijkstra(GRAFO *grafo, int *custos, int *predecessores, int orige
 /*Relaxar é usado para atualizar as distâncias/custos e predecessores de um vértice adjacente
   Toma os vértices (u,v) e verifica se o custo pra chegar em V, partindo de U é menor do que o custo atual para chegar em V.
   Caso seja menor, atualiza a custos[v] para a custos[u]+custo de (u,v) e poe u como predecessor de v*/
-
 void relaxa(GRAFO *grafo, int *custos, int *predecessores, int u, int v)
 {
     ADJACENCIA *adjacencia = grafo->adjacente[u].cabeca;
@@ -134,19 +133,6 @@ int verticeComMenorDistancia(GRAFO *grafo, int *aberto, int *custos)
     return (menor);
 }
 
-void imprimeCaminhoMinimo(int origem, int destino, int *caminho, int quantArestas)
-{
-    printf("Caminho minimo do vertice %d para o vertice %d: ", origem + 1, destino);
-    for (int i = 0; i < quantArestas - 1; i++)
-    {
-        if (caminho[i] != 0)
-        {
-            printf("(%d, %d) ", caminho[i], caminho[i + 1]);
-        }
-    }
-    printf("\n");
-}
-
 // retorna um vetor com o caminho minimo
 int *encontraCaminhoMinimo(int origem, int destino, int *predecessores, int quantArestas)
 {
@@ -162,12 +148,43 @@ int *encontraCaminhoMinimo(int origem, int destino, int *predecessores, int quan
         caminho[quantArestas - i - 1] = aux;
         i++;
     }
-    
+
     return (caminho);
 }
 
+void imprimeCaminhoMinimo(int origem, int destino, int *caminho, int quantArestas)
+{
+    printf("Caminho minimo do vertice %d para o vertice %d: ", origem + 1, destino);
+    for (int i = 0; i < quantArestas - 1; i++)
+    {
+        if (caminho[i] != 0)
+        {
+            printf("(%d, %d) ", caminho[i], caminho[i + 1]);
+        }
+    }
+    printf("\n");
+}
+
+// funcao para imprimir o grafo. criada para usar em testes. nao utilizada no programa principal
+void imprimeGrafo(GRAFO *grafo)
+{
+    printf("Vértices: %d\nArestas: %d\n", grafo->vertices, grafo->arcos);
+    int i;
+    for (i = 0; i < grafo->vertices; i++)
+    {
+        printf("v%d: ", i + 1);
+        ADJACENCIA *adjacente = grafo->adjacente[i].cabeca;
+        while (adjacente)
+        {
+            printf("v%d(%d) ", adjacente->vertice + 1, adjacente->custo);
+            adjacente = adjacente->proximo;
+        }
+        printf("\n");
+    }
+}
+
 // retorna um vetor com as custos do vertice de origem para os outros vértices
-void dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas)
+int *dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas, int *custo)
 {
     int *custos = (int *)malloc(grafo->vertices * sizeof(int));
     int *caminho;
@@ -190,26 +207,25 @@ void dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas)
         }
     }
 
-    /*verifica se o vertice destino foi alcancado. Se alcancado prossiga para exibir o caminho.
-    do contrario, exibe a mensagem de não existe caminho entre os dois vértices.*/
+    /*verifica se o vertice destino foi alcancado. Se alcancado chama a funcao para encontrar o caminho e atribui o valor de custo.
+    do contrario, atribui null ao caminho*/
     if (predecessores[destino - 1] != -1)
     {
         caminho = encontraCaminhoMinimo(origem, destino, predecessores, quantArestas);
-        imprimeCaminhoMinimo(origem, destino, caminho, quantArestas);
-        printf("Custo: %d\n", custos[destino - 1]);
+        *custo = custos[destino - 1];
     }
     else
-        printf("Não existe caminho entre os vertices  %d e %d.\n", origem, destino);
+        caminho = NULL;
+
+    return (caminho);
 }
 
 // abre o arquivo, cria o grafo correspondente e chama dijkstra
-void iniciaPrograma(char *nomeArquivo)
+GRAFO *montaGrafoDeArquivo(char *nomeArquivo, int *origem, int *destino, bool *arcoNegativo, bool *foraEscopo)
 {
 
     int quantVertices = 0, quantArestas = 0, verticeInicial = 0, verticeDestino = 0;
     int u, v, custo_aresta;
-    int *custo, **arestas;
-    bool arestaNegativa = false;
 
     // abre arquivo
     FILE *arquivo = fopen(nomeArquivo, "r");
@@ -217,51 +233,66 @@ void iniciaPrograma(char *nomeArquivo)
     // guarda as informacoes adquiridas pelo arquivo
     fscanf(arquivo, " %d %d %d %d", &quantVertices, &quantArestas, &verticeInicial, &verticeDestino);
 
+    // manipula ponteiros para retorno por referencia
+    *origem = verticeInicial;
+    *destino = verticeDestino;
+
     /*testa para saber se o vertice inicial e final estão entre 1 e a quantidade de vértices*/
     if (verticeInicial < 1 || verticeDestino < 1 || verticeInicial > quantVertices || verticeDestino > quantVertices)
     {
-        printf("O vertice origem ou destino esta fora do grafo.");
+        *foraEscopo = true;
     }
-    else // caso contrário, cria o grafo e prossegue
+
+    // cria o grafo com a quantide de vértices
+    GRAFO *grafo = criaGrafo(quantVertices);
+
+    // leitura das linhas do arquivo, criando arestas no grafo criado
+    for (int i = 0; i < quantArestas; i++)
     {
-
-        // cria o grafo com a quantide de vértices
-        GRAFO *grafo = criaGrafo(quantVertices);
-
-        // leitura das linhas do arquivo, criando arestas no grafo criado
-        for (int i = 0; i < quantArestas; i++)
+        fscanf(arquivo, "%d %d %d", &u, &v, &custo_aresta);
+        if (custo_aresta < 0)
         {
-            fscanf(arquivo, "%d %d %d", &u, &v, &custo_aresta);
-            if (custo_aresta < 0)
-                arestaNegativa = true;
-            else
-                criaAresta(grafo, u - 1, v - 1, custo_aresta);
+            *arcoNegativo = true;
         }
-
-        // fecha o arquivo
-        fclose(arquivo);
-
-        // testa se tem aresta de custo negativo
-        if (!arestaNegativa)
-        {
-            // testa se o vertice inicial é diferente do vertice destino. Se forem diferentes, executa dijkstra, do contrário imprime custo zero.
-            if (verticeInicial != verticeDestino)
-            {
-                dijkstra(grafo, verticeInicial - 1, verticeDestino, quantArestas);
-            }
-            else
-            {
-                printf("Caminho minimo do vertice %d para o vertice %d: (%d, %d)\n", verticeInicial, verticeDestino, verticeInicial, verticeDestino);
-                printf("Custo: 0");
-            }
-        }
-        else
-            printf("Nao e possivel calcular caminho minimo em um grafo que contenha aresta de custo negativo usando o algoritmo de dijkstra.");
+        criaAresta(grafo, u - 1, v - 1, custo_aresta);
     }
+    // fecha o arquivo
+    fclose(arquivo);
+
+    return (grafo);
 }
 
 int main(int argc, char *argv[])
 {
-    iniciaPrograma(argv[1]);
+    //variaveis de controle
+    int verticeInicial = 0, verticeDestino = 0, custo = -1;
+    bool arestaNegativa = false, verticeForaEscopo = false;
+    
+    GRAFO *grafo;
+    grafo = montaGrafoDeArquivo(argv[1], &verticeInicial, &verticeDestino, &arestaNegativa, &verticeForaEscopo);
+
+    /*testa se os vertices estao fora de escopo, se há haresta negativa ou se origem é diferente de destino*/
+
+    if (!verticeForaEscopo && !arestaNegativa && verticeInicial != verticeDestino)
+    {
+        int *caminho;
+        caminho = dijkstra(grafo, verticeInicial - 1, verticeDestino, grafo->arcos, &custo);
+        if (caminho != NULL)
+        {
+            imprimeCaminhoMinimo(verticeInicial - 1, verticeDestino, caminho, grafo->arcos);
+            printf("Custo: %d\n", custo);
+        }
+        else
+            printf("Nao existe caminho do vertice %d para o vertice %d.", verticeInicial, verticeDestino);
+    }
+    else if (arestaNegativa)
+    {
+        printf("Nao e possivel usar algoritmo de dijkstra para descobrir o caminho minimo em grafo que contenha aresta de custo negativo.");
+    }
+    else if (verticeForaEscopo)
+        printf("O vertice origem ou vertice destino estao fora do escopo do grafo.");
+    else
+        printf("Vertice de origem igual ao vertice de destino");
+
     return 0;
 }

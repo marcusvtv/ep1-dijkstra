@@ -141,7 +141,7 @@ int encontraCaminhoMinimo(int origem, int destino, int *predecessores, int quant
     caminho[quantArestas-2] = predecessores[destino-1]+1;
     int i = 2;
     aux = predecessores[destino-1]+1;
-    while (aux != origem) {
+    while (aux != origem+1) {
         aux = predecessores[aux-1] + 1;
         caminho[quantArestas-i-1] = aux;
         i++;

@@ -125,7 +125,7 @@ int verticeComMenorDistancia(GRAFO *grafo, int *aberto, int *custos){
 }
 
 void imprimeCaminhoMinimo(int origem, int destino, int *caminho, int quantArestas) {
-    printf("Caminho mínimo do vértice %d para o vértice %d: ", origem + 1, destino);
+    printf("Caminho minimo do vertice %d para o vertice %d: ", origem + 1, destino);
     for(int i = 0; i < quantArestas-1; i++){
         if (caminho[i] != 0) {
             printf("(%d , %d) ", caminho[i], caminho[i+1]);
@@ -150,7 +150,7 @@ int encontraCaminhoMinimo(int origem, int destino, int *predecessores, int quant
 }
 
 //retorna um vetor com as custos do vertice de origem para os outros vértices
-int *dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas) {
+void dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas) {
     int *custos = (int *) malloc(grafo->vertices*sizeof(int));
     int predecessores[grafo->vertices];
     bool aberto[grafo->vertices];
@@ -168,11 +168,13 @@ int *dijkstra(GRAFO *grafo, int origem, int destino, int quantArestas) {
             adjacente = adjacente->proximo;
         }
     }
+
     encontraCaminhoMinimo(origem, destino, predecessores, quantArestas);
-    return(custos);
+    printf("Custo: %d\n", custos[destino-1]);
+    
 }
 
-GRAFO *iniciaPrograma(char* nomeArquivo) {
+void iniciaPrograma(char* nomeArquivo) {
 
     int quantVertices = 0, quantArestas = 0, verticeInicial = 0, verticeDestino = 0;
     int u,v,custo_aresta;
@@ -207,13 +209,12 @@ GRAFO *iniciaPrograma(char* nomeArquivo) {
     int vertice = 0;
     int i;
 
-    r = dijkstra(grafo, verticeInicial-1, verticeDestino, quantArestas);
-    printf("Custo: D(v%d -> v%d) = %d\n", vertice+1, verticeDestino, r[verticeDestino-1]);
-    return(grafo);
+    dijkstra(grafo, verticeInicial-1, verticeDestino, quantArestas);
+    
 }
 
 int main( int argc, char *argv[ ] )
 {
-    GRAFO *grafo = iniciaPrograma(argv[1]);
+    iniciaPrograma(argv[1]);
     return 0;
 }
